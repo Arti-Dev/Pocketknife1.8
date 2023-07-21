@@ -32,7 +32,7 @@ public class SendUp extends PocketknifeSubcommand {
                     }
                     player.setVelocity(new Vector(0, 5, 0));
                     player.getWorld().strikeLightningEffect(player.getLocation());
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 10, 1);
+                    player.getWorld().playSound(player.getLocation(), Sound.AMBIENCE_THUNDER, 10, 1);
                     player.sendMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "Up you go!");
 
                 }
@@ -55,7 +55,7 @@ public class SendUp extends PocketknifeSubcommand {
                 onlinePlayerNames.add(player.getName());
             }
 
-            specifiedPlayerNames = Arrays.stream(args).toList();
+            specifiedPlayerNames = Arrays.asList(args);
 
             Utils.removeAllIgnoreCase(onlinePlayerNames, specifiedPlayerNames);
 

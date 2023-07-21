@@ -61,8 +61,9 @@ public class PVPDebug extends PocketknifeSubcommand implements Listener {
     public void onDamage(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
         if (!enabled) return;
-        if (!(event.getEntity() instanceof Player victim)) return;
+        if (!(event.getEntity() instanceof Player)) return;
 
+        Player victim = (Player) event.getEntity();
         Player damager;
 
         // Melee hit?

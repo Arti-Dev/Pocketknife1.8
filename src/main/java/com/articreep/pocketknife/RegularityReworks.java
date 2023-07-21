@@ -1,6 +1,7 @@
 package com.articreep.pocketknife;
 
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -42,7 +43,8 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
     @EventHandler
     public void onHit(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
-        if (!(event.getEntity() instanceof Player victim)) return;
+        if (!(event.getEntity() instanceof Player)) return;
+        Player victim = (Player) event.getEntity();
 
         Player damager;
 
@@ -56,12 +58,16 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
         // Read their pants.
 
         ItemStack pants = damager.getInventory().getLeggings();
-        String id = Utils.getItemID(pants);
-        if (id == null) return;
+//        String id = Utils.getItemID(pants);
+//        if (id == null) return;
+//
+//        if (id.startsWith("REGULARITY_")) {
+//            int option = Utils.parseInt(id.substring(id.length() - 1));
 
-        if (id.startsWith("REGULARITY_")) {
-            int option = Utils.parseInt(id.substring(id.length() - 1));
-
+        // todo this is temporary
+        String name = pants.getItemMeta().getDisplayName();
+        if (name.startsWith(ChatColor.DARK_RED + "Regularity Testing Pants - Option ")) {
+            int option = Utils.parseInt(name.substring(name.length() - 1));
             // Cooldown only
             if (option == 1) {
                 if (event.getFinalDamage() > 3) return;
@@ -79,7 +85,7 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
                     damager.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "REGS! " + ChatColor.RESET + "Your follow-up dealt " + event.getFinalDamage() + " damage!");
                 } else {
                     playersEmpowered.add(damager);
-                    damager.getWorld().playSound(damager.getLocation(), Sound.ENTITY_GUARDIAN_HURT, 1, 1);
+                    damager.getWorld().playSound(damager.getLocation(), Sound.SKELETON_HURT, 1, 1);
                 }
             // Bombs
             } else if (option == 3) {
@@ -202,11 +208,11 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
             public void run() {
                 if (cooldownLeft <= 0) {
                     playersOnCooldown.remove(player);
-                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent());
+                    // player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent());
                     this.cancel();
                 }
-                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.RED + "Regularity CD: "
-                        + String.format("%.2f", cooldownLeft/20) + "s"));
+                Utils.sendActionBar(player, ChatColor.RED + "Regularity CD: "
+                        + String.format("%.2f", cooldownLeft/20) + "s");
                 cooldownLeft--;
             }
         }.runTaskTimer(Pocketknife.getInstance(), 0, 1);
@@ -224,7 +230,7 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
     }
 
     private void applyBomb(Player victim, double time, boolean allowControl) {
-        victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_PARROT_IMITATE_CREEPER, 1, 1);
+        victim.getWorld().playSound(victim.getLocation(), Sound.CREEPER_HISS, 1, 1);
         new BukkitRunnable() {
             double t = time * 20;
             double rads = 0;
@@ -238,14 +244,14 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
                     } else {
                         victim.setVelocity(Utils.randomKB(0.4));
                     }
-                    victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
-                    victim.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, victim.getLocation(), 1);
+                    victim.getWorld().playSound(victim.getLocation(), Sound.EXPLODE, 1, 1);
+                    Utils.sendExplosion(victim.getLocation());
                     Utils.trueDamage(victim, 1);
                     launchNearby(victim);
                     this.cancel();
                 }
                 Location loc = victim.getLocation().add(Math.sin(rads), 1, Math.cos(rads));
-                victim.getWorld().spawnParticle(Particle.REDSTONE, loc, 1, new Particle.DustOptions(Color.RED, 0.7F));
+                Utils.sendRedstoneParticle(Pocketknife.getInstance(), loc);
                 rads += 0.3;
                 t--;
 
@@ -255,7 +261,8 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
 
     private void launchNearby(Player victim) {
         for (Entity entity : victim.getNearbyEntities(2, 2, 2)) {
-            if (entity instanceof Player player) {
+            if (entity instanceof Player) {
+                Player player = (Player) entity;
                 player.setVelocity(Utils.entitiesToHorizontalNormalizedVector(victim, player, 0.4).setY(0.4));
                 Utils.trueDamage(player, 1);
             }
@@ -268,7 +275,7 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
 
         // Set the name of the item
         meta.setDisplayName(ChatColor.DARK_RED + "Regularity Testing Pants - Option " + option);
-        Utils.setItemID(meta, "REGULARITY_" + option);
+//        Utils.setItemID(meta, "REGULARITY_" + option);
 
         if (option == 1) {
             // Set the lore of the item

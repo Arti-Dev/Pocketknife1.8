@@ -29,12 +29,14 @@ public class Instaboom extends PocketknifeSubcommand implements Listener {
 
         Block b = event.getBlockPlaced();
         Player p = event.getPlayer();
-        ItemStack item = p.getInventory().getItemInMainHand();
+        ItemStack item = p.getInventory().getItemInHand();
         World w = p.getWorld();
         int factor = 3;
 
         if (b.getType() != Material.TNT) return;
-        if (!Objects.equals(Utils.getItemID(item), "INSTABOOM_TNT")) return;
+//        if (!Objects.equals(Utils.getItemID(item), "INSTABOOM_TNT")) return;
+        // todo this is temporary
+        if (!item.getItemMeta().getDisplayName().equals(createInstaboom().getItemMeta().getDisplayName())) return;
         event.setCancelled(true);
 
         Location playerLoc = p.getLocation();
@@ -47,8 +49,8 @@ public class Instaboom extends PocketknifeSubcommand implements Listener {
         vector.normalize();
         vector.multiply(factor);
 
-        w.playSound(exploLoc, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
-        w.spawnParticle(Particle.EXPLOSION_HUGE, exploLoc, 1);
+        w.playSound(exploLoc, Sound.EXPLODE, 1, 1);
+        Utils.sendbeegExplosion(exploLoc);
 
         p.setVelocity(vector);
 
@@ -57,7 +59,8 @@ public class Instaboom extends PocketknifeSubcommand implements Listener {
 
     @Override
     public boolean runCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player p) {
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
             p.getInventory().addItem(createInstaboom());
             p.sendMessage(ChatColor.RED + "Instaboom TNT added to your inventory");
             return true;
@@ -79,7 +82,7 @@ public class Instaboom extends PocketknifeSubcommand implements Listener {
         ItemStack tnt = new ItemStack(Material.TNT);
         ItemMeta meta = tnt.getItemMeta();
         meta.setDisplayName(ChatColor.AQUA + "Instaboom TNT");
-        Utils.setItemID(meta, "INSTABOOM_TNT");
+//        Utils.setItemID(meta, "INSTABOOM_TNT");
         tnt.setItemMeta(meta);
         tnt.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         return tnt;

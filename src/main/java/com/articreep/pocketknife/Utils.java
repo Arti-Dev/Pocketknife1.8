@@ -1,20 +1,21 @@
 package com.articreep.pocketknife;
 
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class Utils {
      * @param item ItemStack to check
      * @return true if diamond armor - false otherwise
      */
-    public static boolean isDiamondArmor(@Nullable ItemStack item) {
+    public static boolean isDiamondArmor(ItemStack item) {
         if (item == null) return false;
         Material material = item.getType();
         return material == Material.DIAMOND_BOOTS ||
@@ -227,44 +228,44 @@ public class Utils {
         double z = (Math.random() * 2) - 1;
         return new Vector(x, y, z).normalize().multiply(magnitude);
     }
-
-    private static final NamespacedKey key = new NamespacedKey(Pocketknife.getInstance(), "ITEM_ID");
-    /**
-     * Adds an item ID to the PersistentDataContainer of the item.
-     * @param item Item to add an ID to
-     * @throws NullPointerException if item is null
-     */
-    public static void setItemID(ItemStack item, String id) {
-
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) throw new NullPointerException("Item has no ItemMeta");
-
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        container.set(key, PersistentDataType.STRING, id);
-        item.setItemMeta(meta);
-    }
-
-    /**
-     * Adds an item ID to the PersistentDataContainer of the meta. Remember to apply the ItemMeta back to the ItemStack!
-     * @param meta Meta to add an ID to
-     * @throws NullPointerException if meta is null
-     */
-    public static void setItemID(ItemMeta meta, String id) {
-
-        if (meta == null) throw new NullPointerException("Meta cannot be null");
-
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        container.set(key, PersistentDataType.STRING, id);
-    }
-
-    public static String getItemID(ItemStack item) {
-        if (item == null) return null;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return null;
-
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        return container.get(key, PersistentDataType.STRING);
-    }
+/* TODO Make this use NBT
+//    private static final NamespacedKey key = new NamespacedKey(Pocketknife.getInstance(), "ITEM_ID");
+//    /**
+//     * Adds an item ID to the PersistentDataContainer of the item.
+//     * @param item Item to add an ID to
+//     * @throws NullPointerException if item is null
+//     */
+//    public static void setItemID(ItemStack item, String id) {
+//
+//        ItemMeta meta = item.getItemMeta();
+//        if (meta == null) throw new NullPointerException("Item has no ItemMeta");
+//
+//        PersistentDataContainer container = meta.getPersistentDataContainer();
+//        container.set(key, PersistentDataType.STRING, id);
+//        item.setItemMeta(meta);
+//    }
+//
+//    /**
+//     * Adds an item ID to the PersistentDataContainer of the meta. Remember to apply the ItemMeta back to the ItemStack!
+//     * @param meta Meta to add an ID to
+//     * @throws NullPointerException if meta is null
+//     */
+//    public static void setItemID(ItemMeta meta, String id) {
+//
+//        if (meta == null) throw new NullPointerException("Meta cannot be null");
+//
+//        PersistentDataContainer container = meta.getPersistentDataContainer();
+//        container.set(key, PersistentDataType.STRING, id);
+//    }
+//
+//    public static String getItemID(ItemStack item) {
+//        if (item == null) return null;
+//        ItemMeta meta = item.getItemMeta();
+//        if (meta == null) return null;
+//
+//        PersistentDataContainer container = meta.getPersistentDataContainer();
+//        return container.get(key, PersistentDataType.STRING);
+//    }
 
     public static String booleanStatus(boolean boo) {
         if (boo) return "ON";
@@ -283,4 +284,32 @@ public class Utils {
         return -pitch;
     }
 
+    public static void sendActionBar(Player player, String string) {
+        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + string + "\"}"), (byte) 2);
+        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+    }
+
+    public static void sendbeegExplosion(Location loc) {
+        PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.EXPLOSION_HUGE,
+                true, (float) loc.getX(), (float) loc.getY(), (float) loc.getZ(), 0, 0, 0, 0, 1);
+        for(Player online : Bukkit.getOnlinePlayers()) {
+            ((CraftPlayer)online).getHandle().playerConnection.sendPacket(packet);
+        }
+    }
+
+    public static void sendExplosion(Location loc) {
+        PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.EXPLOSION_LARGE, true,
+                (float) loc.getX(), (float) loc.getY(), (float) loc.getZ(), 0, 0, 0, 0, 1);
+        for(Player online : Bukkit.getOnlinePlayers()) {
+            ((CraftPlayer)online).getHandle().playerConnection.sendPacket(packet);
+        }
+    }
+
+    public static void sendRedstoneParticle(Pocketknife plugin, Location loc) {
+        PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, true,
+                (float) loc.getX(), (float) loc.getY(), (float) loc.getZ(), 0, 0, 0, 0, 3);
+        for(Player online : Bukkit.getOnlinePlayers()) {
+            ((CraftPlayer)online).getHandle().playerConnection.sendPacket(packet);
+        }
+    }
 }
