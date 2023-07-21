@@ -211,6 +211,7 @@ public class Utils {
         if (victim.getHealth() - amount <= 0) {
             victim.damage(100000);
         } else {
+            // TODO this line was throwing an IllegalArgumentException (must be between 0 and 20.0). Not sure why.
             victim.setHealth(victim.getHealth() - amount);
             victim.damage(0.0000000000000000000000000000000000001);
         }
