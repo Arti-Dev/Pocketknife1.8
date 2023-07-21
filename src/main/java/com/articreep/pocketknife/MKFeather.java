@@ -57,7 +57,7 @@ public class MKFeather extends PocketknifeSubcommand implements PocketknifeFeatu
                 ChatColor.AQUA + "Jump Boost VII" + ChatColor.YELLOW + " for 1s",
                 ChatColor.WHITE + "Speed II " + ChatColor.YELLOW + "for 10s",
                 ChatColor.DARK_GRAY + "15s cooldown.",
-                ChatColor.DARK_GRAY + String.valueOf(ChatColor.ITALIC) + "Free cape!"));
+                ChatColor.DARK_GRAY + String.valueOf(ChatColor.ITALIC) + "Kept on death"));
         feather.setItemMeta(meta);
         return feather;
     }
