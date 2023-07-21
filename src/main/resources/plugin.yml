@@ -1,8 +1,8 @@
 name: Pocketknife
 main: com.articreep.pocketknife.Pocketknife
-version: 1.6
+version: 1.6v1.8
 author: Arti_Creep
-api-version: '1.20'
+api-version: '1.8'
 commands:
   pocketknife:
     description: Used to access various experiments from Pocketknife.
