@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
 import org.bukkit.util.Vector;
@@ -29,8 +29,10 @@ public class DiamondHit extends PocketknifeSubcommand implements Listener, Pocke
         if (event.isCancelled()) return;
         if (!enabled) return;
 
-        if (!(event.getDamager() instanceof Player damager && event.getEntity() instanceof Player victim)) return;
+        if (!(event.getDamager() instanceof Player && event.getEntity() instanceof Player)) return;
 
+        Player damager = (Player) event.getDamager();
+        Player victim = (Player) event.getEntity();
         ItemStack[] items = victim.getEquipment().getArmorContents();
 
         boolean hasDiamondArmor = false;
@@ -47,24 +49,25 @@ public class DiamondHit extends PocketknifeSubcommand implements Listener, Pocke
     private void dropXP(Player damager, Player victim) {
         Vector v = Utils.entitiesToNormalizedVector(damager, victim, 0.5);
         v.setY(0.5);
-        Item bottle = victim.getWorld().dropItem(victim.getLocation().add(0, 1, 0), new ItemStack(Material.EXPERIENCE_BOTTLE));
-        damager.getWorld().playSound(damager, Sound.ENTITY_EXPERIENCE_BOTTLE_THROW, 1, 1);
+        Item bottle = victim.getWorld().dropItem(victim.getLocation().add(0, 1, 0), new ItemStack(Material.EXP_BOTTLE));
+        damager.getWorld().playSound(damager.getLocation(), Sound.SHOOT_ARROW, 1, 1);
         bottle.setVelocity(v);
         droppedXPSet.add(bottle);
     }
 
     @EventHandler
-    public void onXPPickup(EntityPickupItemEvent event) {
+    public void onXPPickup(PlayerPickupItemEvent event) {
+        // todo - this isn't working on 1.8
         if (event.isCancelled()) return;
         if (!enabled) return;
 
-        if (!(event.getEntity() instanceof Player player)) return;
+        Player player = event.getPlayer();
         if (droppedXPSet.contains(event.getItem())) {
             event.setCancelled(true);
             droppedXPSet.remove(event.getItem());
             event.getItem().remove();
             player.sendMessage(ChatColor.AQUA + "" + ChatColor.BOLD + "XP!" + ChatColor.RESET + "" + ChatColor.AQUA + " +30 XP " + ChatColor.GRAY + "from opponent armor piece");
-            player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);
+            player.playSound(player.getLocation(), Sound.ARROW_HIT, 1, 1);
         }
     }
 
