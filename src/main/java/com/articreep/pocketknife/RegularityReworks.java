@@ -65,7 +65,9 @@ public class RegularityReworks extends PocketknifeSubcommand implements Listener
 //            int option = Utils.parseInt(id.substring(id.length() - 1));
 
         // todo this is temporary
+        if (pants == null) return;
         if (!pants.hasItemMeta()) return;
+        if (!pants.getItemMeta().hasDisplayName()) return;
         String name = pants.getItemMeta().getDisplayName();
         if (name.startsWith(ChatColor.DARK_RED + "Regularity Testing Pants - Option ")) {
             int option = Utils.parseInt(name.substring(name.length() - 1));
