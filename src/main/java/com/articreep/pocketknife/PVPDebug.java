@@ -2,21 +2,24 @@ package com.articreep.pocketknife;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 
 public class PVPDebug extends PocketknifeSubcommand implements Listener {
     Pocketknife plugin;
-    private boolean enabled = false;
+    private static boolean enabled = false;
     private int tickCount = 0;
     private BukkitTask task;
     private final HashMap<Player, Integer> ticksSinceLastHit = new HashMap<>();
@@ -57,7 +60,7 @@ public class PVPDebug extends PocketknifeSubcommand implements Listener {
         return "Usage: /pocketknife PVPDebug";
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.MONITOR)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
         if (!enabled) return;
@@ -77,9 +80,11 @@ public class PVPDebug extends PocketknifeSubcommand implements Listener {
             return;
         }
 
+        DecimalFormat formatter = new DecimalFormat("#.##");
+
         // Quick debug
-        damager.sendMessage("You dealt " + event.getFinalDamage() + " to " + victim.getName());
-        victim.sendMessage(damager.getName() + " dealt " + event.getFinalDamage() + " to you");
+        damager.sendMessage("You dealt " + formatter.format(event.getFinalDamage()) + " to " + victim.getName());
+        victim.sendMessage(damager.getName() + " dealt " + formatter.format(event.getFinalDamage()) + " to you");
         // Tick testing
         if (ticksSinceLastHit.containsKey(victim)) {
             damager.sendMessage(victim.getName() + " was last hit " + (tickCount - ticksSinceLastHit.get(victim)) + " ticks ago");
@@ -89,5 +94,19 @@ public class PVPDebug extends PocketknifeSubcommand implements Listener {
         damager.sendMessage("Your victim has " + victim.getNoDamageTicks() + " no damage ticks.");
         Bukkit.getScheduler().runTaskLater(Pocketknife.getInstance(), () -> damager.sendMessage("Your victim has " + victim.getNoDamageTicks()
                 + " no damage ticks 1 tick later"), 1);
+
+        // Reach
+        Location damagerLoc = damager.getLocation();
+        Location victimLoc = victim.getLocation();
+        double distance = damagerLoc.distance(victimLoc);
+        damager.sendMessage("You hit " + victim.getName() + " from " + ChatColor.GREEN + formatter.format(distance) +
+                ChatColor.WHITE + " blocks away");
+        victim.sendMessage(damager.getName() + " hit you from " + ChatColor.GREEN + formatter.format(distance) +
+                ChatColor.WHITE + " blocks away");
     }
+
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
 }
